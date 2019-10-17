@@ -50,6 +50,23 @@ export function varDef(name: string, value: Arbitrary<any>): SpecDefVariable {
 
 export type FindSpecElement = SpecDefFunction | SpecDefInstance | SpecDefVariable;
 
+export type FindSpecSettings = {
+  /**
+   * Number of combinations to try - default: 100
+   */
+  numSamples?: number;
+  /**
+   * Complexity of the combinations - default: 2
+   *
+   * Higher complexity will produce combinations with more nested calls.
+   */
+  complexity?: number;
+  /**
+   * Number of inputs to try to confirm a combination - default: 100
+   */
+  numFuzz?: number;
+};
+
 type FindSpecsInternal = {
   numArbs: number;
   build: (ins: any[], offset: number) => { value: any; nextOffset: number };
@@ -57,7 +74,7 @@ type FindSpecsInternal = {
 };
 type FindSpecsInternalBuilder = (n?: number) => Arbitrary<FindSpecsInternal>;
 
-export function findSpecs(def: FindSpecElement[]): string[] {
+export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): string[] {
   const baseArbs: { name: string; arb: Arbitrary<any> }[] = [];
   const specTermArbBuilder: FindSpecsInternalBuilder[] = [];
 
@@ -155,7 +172,7 @@ export function findSpecs(def: FindSpecElement[]): string[] {
       }
     }
   }
-  const maxDepth = 2;
+  const maxDepth = settings && settings.complexity !== undefined ? settings.complexity : 2;
   const specTermArb = oneof(...specTermArbBuilder.map(a => a(maxDepth)));
   const specArb = tuple(specTermArb, specTermArb)
     .chain(([t1, t2]) => {
@@ -186,7 +203,7 @@ export function findSpecs(def: FindSpecElement[]): string[] {
 
   const validSpecs: string[] = [];
   const previousSpecs = new Map<string, Set<string>>();
-  for (const spec of sample(specArb, 10000)) {
+  for (const spec of sample(specArb, settings && settings.numSamples)) {
     // Sort labels of specs to have a consistent way to store
     // the already investigated combinations
     const minSpecLabel = spec.spec1 < spec.spec2 ? spec.spec1 : spec.spec2;
@@ -214,7 +231,8 @@ export function findSpecs(def: FindSpecElement[]): string[] {
       const out = check(
         property(genericTuple(spec.inputArbs), t => {
           return isEqual(spec.build1(t), spec.build2(t));
-        })
+        }),
+        { numRuns: settings && settings.numFuzz }
       );
       if (!out.failed) validSpecs.push(specLabel);
     }
