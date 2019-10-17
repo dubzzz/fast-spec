@@ -27,7 +27,8 @@
   "homepage": "https://github.com/dubzzz/fast-spec#readme",
   "dependencies": {
     "fast-check": "^1.17.0",
-    "lodash.isequal": "^4.5.0"
+    "lodash.isequal": "^4.5.0",
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
     "@types/lodash.isequal": "^4.5.5",
