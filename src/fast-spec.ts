@@ -201,7 +201,29 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
     .filter(d => d.spec1 !== d.spec2)
     .noShrink();
 
-  const validSpecs: string[] = [];
+  const equalities = new Map<string, Set<string>>();
+  const addEquality = (specA: string, specB: string) => {
+    if (specA === specB) {
+      return;
+    }
+    const alreadyKnowA = equalities.has(specA);
+    const alreadyKnowB = equalities.has(specB);
+    if (alreadyKnowA && alreadyKnowB) {
+      // merge A and B
+      equalities.set(specA, new Set([...equalities.get(specA)!, ...equalities.get(specB)!]));
+      // remove B
+      equalities.delete(specB);
+    } else if (alreadyKnowA) {
+      // append specB into already known equalities for specA
+      equalities.get(specA)!.add(specB);
+    } else if (alreadyKnowB) {
+      // append specA into already known equalities for specB
+      equalities.get(specB)!.add(specA);
+    } else {
+      // create a new equlity relation
+      equalities.set(specA, new Set([specA, specB]));
+    }
+  };
   const previousSpecs = new Map<string, Set<string>>();
   for (const spec of sample(specArb, settings && settings.numSamples)) {
     // Sort labels of specs to have a consistent way to store
@@ -220,11 +242,10 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
     }
     previousSpecs.get(minSpecLabel)!.add(maxSpecLabel);
 
-    const specLabel = `${minSpecLabel} == ${maxSpecLabel}`;
     if (spec.inputArbs.length === 0) {
       // Combination only rely on constants
       if (isEqual(spec.build1([]), spec.build2([]))) {
-        validSpecs.push(specLabel);
+        addEquality(minSpecLabel, maxSpecLabel);
       }
     } else {
       // Combination rely on non-constant values
@@ -234,8 +255,12 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
         }),
         { numRuns: settings && settings.numFuzz }
       );
-      if (!out.failed) validSpecs.push(specLabel);
+      if (!out.failed) addEquality(minSpecLabel, maxSpecLabel);
     }
   }
-  return [...new Set(validSpecs)].sort();
+  return Array.from(equalities.values()).map(vs =>
+    Array.from(vs)
+      .sort()
+      .join(' == ')
+  );
 }
