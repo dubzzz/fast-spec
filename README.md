@@ -31,6 +31,7 @@ findSpecs([
 - concat([], []) = []
 - concat([], x0) == x0
 - concat(x0, []) == x0
+- concat(concat(x0, x1), x2) == concat(x0, concat(x1, x2))
 - concat(reverse(x0), reverse(x1)) == reverse(concat(x1, x0))
 - reverse([]) = []
 - reverse(reverse(x0)) == x0
