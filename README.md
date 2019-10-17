@@ -12,14 +12,16 @@ Have you ever wonder what could be the laws that rule your code? The complex rel
 
 Let's find the laws that link `concat`, `reverse` and `[]` together.
 
-```ts
+```js
 import * as fc from "fast-check";
 import { funcDef, instDef, varDef, findSpecs } from "fast-spec";
+// const fc = require("fast-check");
+// const { funcDef, instDef, varDef, findSpecs } = require("fast-spec");
 
 findSpecs([
   // declare functions to be considered
-  funcDef("concat", 2, (a: any[], b: any[]) => [...a, ...b]),
-  funcDef("reverse", 1, (a: any[]) => [...a].reverse()),
+  funcDef("concat", 2, (a, b) => [...a, ...b]),
+  funcDef("reverse", 1, (a) => [...a].reverse()),
   // declare basic root values (of special interest)
   instDef("[]", []),
   // declare complex values that can be consumed by your functions
