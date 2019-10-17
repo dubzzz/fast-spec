@@ -200,6 +200,7 @@ export function findSpecs(def: FindSpecElement[]): string[] {
         };
       });
     })
+    .filter(d => d.spec1 !== d.spec2)
     .map(d =>
       d.spec1 < d.spec2
         ? d
