@@ -24,7 +24,14 @@ findSpecs([
   instDef("[]", []),
   // declare complex values that can be consumed by your functions
   varDef("x", fc.array(fc.char()))
-])
+], { // optional settings
+  // number of combinations to try - default: 100
+  numSamples: 100,
+  // complexity of the combinations - default: 2
+  complexity: 2,
+  // number of inputs to try to confirm a combination - default: 100
+  numFuzz: 100
+})
 ```
 
 `fast-spec` will be able to find relationships like:
