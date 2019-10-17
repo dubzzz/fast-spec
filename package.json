@@ -1,0 +1,35 @@
+{
+  "name": "fast-spec",
+  "version": "0.0.0",
+  "description": "Discover laws in your code like with QuickSpec",
+  "main": "lib/fast-spec.js",
+  "types": "lib/fast-check.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "start": "tsc && node lib/tryit.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dubzzz/fast-spec.git"
+  },
+  "keywords": [
+    "quickspec",
+    "fast-check",
+    "laws"
+  ],
+  "author": "Nicolas DUBIEN <github@dubien.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dubzzz/fast-spec/issues"
+  },
+  "homepage": "https://github.com/dubzzz/fast-spec#readme",
+  "dependencies": {
+    "fast-check": "^1.17.0",
+    "lodash.isequal": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/lodash.isequal": "^4.5.5",
+    "@types/node": "^12.11.1",
+    "typescript": "^3.6.4"
+  }
+}
