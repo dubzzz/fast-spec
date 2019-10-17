@@ -1,4 +1,4 @@
-import isEqual from "lodash.isequal";
+import isEqual from 'lodash.isequal';
 import {
   array,
   memo,
@@ -12,12 +12,12 @@ import {
   check,
   property,
   Arbitrary
-} from "fast-check";
+} from 'fast-check';
 
 export enum SpecDefType {
-  Function = "function",
-  Instance = "instance",
-  Variable = "variable"
+  Function = 'function',
+  Instance = 'instance',
+  Variable = 'variable'
 }
 
 export type SpecDefFunction = {
@@ -26,11 +26,7 @@ export type SpecDefFunction = {
   numParameters: number;
   value: (...args: any[]) => any;
 };
-export function funcDef(
-  name: string,
-  numParameters: number,
-  value: (...args: any[]) => any
-): SpecDefFunction {
+export function funcDef(name: string, numParameters: number, value: (...args: any[]) => any): SpecDefFunction {
   return { name, type: SpecDefType.Function, value, numParameters };
 }
 
@@ -52,18 +48,12 @@ export function varDef(name: string, value: Arbitrary<any>): SpecDefVariable {
   return { name, type: SpecDefType.Variable, value };
 }
 
-export type FindSpecElement =
-  | SpecDefFunction
-  | SpecDefInstance
-  | SpecDefVariable;
+export type FindSpecElement = SpecDefFunction | SpecDefInstance | SpecDefVariable;
 
 type FindSpecsInternal = {
   numArbs: number;
   build: (ins: any[], offset: number) => { value: any; nextOffset: number };
-  repr: (
-    ins: string[],
-    offset: number
-  ) => { value: string; nextOffset: number };
+  repr: (ins: string[], offset: number) => { value: string; nextOffset: number };
 };
 type FindSpecsInternalBuilder = (n?: number) => Arbitrary<FindSpecsInternal>;
 
@@ -121,48 +111,44 @@ export function findSpecs(def: FindSpecElement[]): string[] {
                 repr: (xn: string[], offset: number) => {
                   const nextOffset = offset + el.numParameters;
                   return {
-                    value: `${el.name}(${xn
-                      .slice(offset, nextOffset)
-                      .join(", ")})`,
+                    value: `${el.name}(${xn.slice(offset, nextOffset).join(', ')})`,
                     nextOffset
                   };
                 }
               })
-            : genericTuple(
-                [...Array(el.numParameters)].map(() =>
-                  oneof(...specTermArbBuilder.map(a => a()))
-                )
-              ).map(t => {
-                return {
-                  numArbs: t.reduce((acc, cur) => acc + cur.numArbs, 0),
-                  build: (ins: any[], offset: number) => {
-                    let nextOffset = offset;
-                    const vs: any = [];
-                    for (let idx = 0; idx !== el.numParameters; ++idx) {
-                      const tmp = t[idx].build(ins, nextOffset);
-                      nextOffset = tmp.nextOffset;
-                      vs.push(tmp.value);
+            : genericTuple([...Array(el.numParameters)].map(() => oneof(...specTermArbBuilder.map(a => a())))).map(
+                t => {
+                  return {
+                    numArbs: t.reduce((acc, cur) => acc + cur.numArbs, 0),
+                    build: (ins: any[], offset: number) => {
+                      let nextOffset = offset;
+                      const vs: any = [];
+                      for (let idx = 0; idx !== el.numParameters; ++idx) {
+                        const tmp = t[idx].build(ins, nextOffset);
+                        nextOffset = tmp.nextOffset;
+                        vs.push(tmp.value);
+                      }
+                      return {
+                        value: el.value(...vs),
+                        nextOffset
+                      };
+                    },
+                    repr: (xn: string[], offset: number) => {
+                      let nextOffset = offset;
+                      const vs: string[] = [];
+                      for (let idx = 0; idx !== el.numParameters; ++idx) {
+                        const tmp = t[idx].repr(xn, nextOffset);
+                        nextOffset = tmp.nextOffset;
+                        vs.push(tmp.value);
+                      }
+                      return {
+                        value: `${el.name}(${vs.join(', ')})`,
+                        nextOffset
+                      };
                     }
-                    return {
-                      value: el.value(...vs),
-                      nextOffset
-                    };
-                  },
-                  repr: (xn: string[], offset: number) => {
-                    let nextOffset = offset;
-                    const vs: string[] = [];
-                    for (let idx = 0; idx !== el.numParameters; ++idx) {
-                      const tmp = t[idx].repr(xn, nextOffset);
-                      nextOffset = tmp.nextOffset;
-                      vs.push(tmp.value);
-                    }
-                    return {
-                      value: `${el.name}(${vs.join(", ")})`,
-                      nextOffset
-                    };
-                  }
-                };
-              })
+                  };
+                }
+              )
         );
         specTermArbBuilder.push(elArb);
         break;
@@ -177,10 +163,7 @@ export function findSpecs(def: FindSpecElement[]): string[] {
       const variableIndexes = [...Array(numArbs)].map((_, i) => i);
 
       return tuple(
-        oneof(
-          constant(variableIndexes),
-          shuffledSubarray(variableIndexes, numArbs, numArbs)
-        ),
+        oneof(constant(variableIndexes), shuffledSubarray(variableIndexes, numArbs, numArbs)),
         numArbs > 0
           ? array(constantFrom(...baseArbs), numArbs, numArbs) // throw if no baseArbs
           : constant([])
@@ -188,9 +171,7 @@ export function findSpecs(def: FindSpecElement[]): string[] {
         const applyReindex = (ins: any[]) => {
           return reindex.map(ri => ins[ri]);
         };
-        const variableNames = inputsDef.map(
-          (inputDef, i) => `${inputDef.name}${i}`
-        );
+        const variableNames = inputsDef.map((inputDef, i) => `${inputDef.name}${i}`);
         return {
           inputArbs: inputsDef.map(inputDef => inputDef.arb),
           build1: (ins: any[]) => t1.build(ins, 0).value,
@@ -201,33 +182,35 @@ export function findSpecs(def: FindSpecElement[]): string[] {
       });
     })
     .filter(d => d.spec1 !== d.spec2)
-    .map(d =>
-      d.spec1 < d.spec2
-        ? d
-        : {
-            inputArbs: d.inputArbs,
-            build1: d.build2,
-            build2: d.build1,
-            spec1: d.spec2,
-            spec2: d.spec1
-          }
-    )
     .noShrink();
 
   const validSpecs: string[] = [];
-  const alreadyTried = new Set<string>();
-  for (const spec of sample(specArb, 1000)) {
-    const specLabel = `${spec.spec1} == ${spec.spec2}`;
-    if (alreadyTried.has(specLabel)) {
+  const previousSpecs = new Map<string, Set<string>>();
+  for (const spec of sample(specArb, 10000)) {
+    // Sort labels of specs to have a consistent way to store
+    // the already investigated combinations
+    const minSpecLabel = spec.spec1 < spec.spec2 ? spec.spec1 : spec.spec2;
+    const maxSpecLabel = spec.spec1 < spec.spec2 ? spec.spec2 : spec.spec1;
+
+    // Skip already covered combinations
+    if (previousSpecs.has(minSpecLabel) && previousSpecs.get(minSpecLabel)!.has(maxSpecLabel)) {
       continue;
     }
-    alreadyTried.add(specLabel);
 
+    // Add combination to the list of covered ones
+    if (!previousSpecs.has(minSpecLabel)) {
+      previousSpecs.set(minSpecLabel, new Set());
+    }
+    previousSpecs.get(minSpecLabel)!.add(maxSpecLabel);
+
+    const specLabel = `${minSpecLabel} == ${maxSpecLabel}`;
     if (spec.inputArbs.length === 0) {
+      // Combination only rely on constants
       if (isEqual(spec.build1([]), spec.build2([]))) {
         validSpecs.push(specLabel);
       }
     } else {
+      // Combination rely on non-constant values
       const out = check(
         property(genericTuple(spec.inputArbs), t => {
           return isEqual(spec.build1(t), spec.build2(t));
