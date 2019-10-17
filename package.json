@@ -6,7 +6,7 @@
   "types": "lib/fast-check.d.ts",
   "sideEffects": false,
   "scripts": {
-    "start": "tsc && node lib/tryit.js",
+    "build": "tsc",
     "format": "prettier --write \"**/*.{js,ts}\"",
     "format:check": "prettier --list-different \"**/*.{js,ts}\""
   },
