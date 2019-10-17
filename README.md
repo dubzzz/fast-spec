@@ -46,4 +46,4 @@ findSpecs([
 - reverse(reverse(x0)) == x0
 - ...
 
-*Live example available at https://runkit.com/dubzzz/hello-world-fast-spec*
+*Live example available at https://runkit.com/dubzzz/hello-world-fast-spec-v2*
