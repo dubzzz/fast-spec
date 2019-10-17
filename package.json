@@ -6,7 +6,9 @@
   "types": "lib/fast-check.d.ts",
   "sideEffects": false,
   "scripts": {
-    "start": "tsc && node lib/tryit.js"
+    "start": "tsc && node lib/tryit.js",
+    "format": "prettier --write \"**/*.{js,ts}\"",
+    "format:check": "prettier --list-different \"**/*.{js,ts}\""
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@types/lodash.isequal": "^4.5.5",
     "@types/node": "^12.11.1",
+    "prettier": "^1.18.2",
     "typescript": "^3.6.4"
   }
 }
