@@ -1,4 +1,3 @@
-import isEqual from 'lodash.isequal';
 import {
   array,
   memo,
@@ -9,8 +8,6 @@ import {
   oneof,
   tuple,
   sample,
-  check,
-  property,
   Arbitrary
 } from 'fast-check';
 import { UnionGraph } from './internal/union-graph';
