@@ -223,9 +223,11 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
 
     if (spec.inputArbs.length === 0) {
       // Combination only rely on constants
-      if (isEqual(spec.build1([]), spec.build2([]))) {
-        union.addLink(minSpecLabel, maxSpecLabel);
-      }
+      try {
+        if (isEqual(spec.build1([]), spec.build2([]))) {
+          union.addLink(minSpecLabel, maxSpecLabel);
+        }
+      } catch (_err) {}
     } else {
       // Combination rely on non-constant values
       const out = check(
