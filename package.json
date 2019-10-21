@@ -1,6 +1,6 @@
 {
   "name": "fast-spec",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Discover laws in your code like with QuickSpec",
   "main": "lib/fast-spec.js",
   "types": "lib/fast-check.d.ts",
