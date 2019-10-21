@@ -1,3 +1,5 @@
 examples/
 src/
 lib/tsconfig.tsbuildinfo
+lib/**/*.js.map
+lib/**/*.spec.*
