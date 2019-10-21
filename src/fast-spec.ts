@@ -203,29 +203,17 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
     .noShrink();
 
   const union = new UnionGraph();
-  const previousSpecs = new Map<string, Set<string>>();
   for (const spec of sample(specArb, settings && settings.numSamples)) {
-    // Sort labels of specs to have a consistent way to store
-    // the already investigated combinations
-    const minSpecLabel = spec.spec1 < spec.spec2 ? spec.spec1 : spec.spec2;
-    const maxSpecLabel = spec.spec1 < spec.spec2 ? spec.spec2 : spec.spec1;
-
     // Skip already covered combinations
-    if (previousSpecs.has(minSpecLabel) && previousSpecs.get(minSpecLabel)!.has(maxSpecLabel)) {
+    if (union.hasLink(spec.spec1, spec.spec2)) {
       continue;
     }
-
-    // Add combination to the list of covered ones
-    if (!previousSpecs.has(minSpecLabel)) {
-      previousSpecs.set(minSpecLabel, new Set());
-    }
-    previousSpecs.get(minSpecLabel)!.add(maxSpecLabel);
 
     if (spec.inputArbs.length === 0) {
       // Combination only rely on constants
       try {
         if (isEqual(spec.build1([]), spec.build2([]))) {
-          union.addLink(minSpecLabel, maxSpecLabel);
+          union.addLink(spec.spec1, spec.spec2);
         }
       } catch (_err) {}
     } else {
@@ -236,7 +224,7 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
         }),
         { numRuns: settings && settings.numFuzz, endOnFailure: true }
       );
-      if (!out.failed) union.addLink(minSpecLabel, maxSpecLabel);
+      if (!out.failed) union.addLink(spec.spec1, spec.spec2);
     }
   }
   return union.values().map(vs => vs.sort().join(' == '));
