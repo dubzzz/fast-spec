@@ -14,6 +14,20 @@ export class UnionGraph {
   private readonly links = new Map<string, Set<string>>();
 
   /**
+   * Check a link between two nodes
+   */
+  hasLink(nodeA: string, nodeB: string): boolean {
+    if (nodeA === nodeB) {
+      // stop: no need for a link
+      return true;
+    }
+
+    const parentNodeA = this.parentNode.get(nodeA);
+    const parentNodeB = this.parentNode.get(nodeB);
+    return parentNodeA !== undefined && parentNodeA === parentNodeB;
+  }
+
+  /**
    * Create a link between two nodes (must have different names)
    *
    * Unknown nodes will be created

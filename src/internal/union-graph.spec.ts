@@ -83,6 +83,66 @@ test('should be able to add new nodes on merged trees', () => {
   expect(reorder(union.values())).toEqual([['a', 'b', 'c', 'd', 'e', 'f']]);
 });
 
+test('should not find a link between non existing nodes', () => {
+  // Arrange
+  const union = new UnionGraph();
+
+  // Act
+  union.addLink('a', 'b');
+
+  // Assert
+  expect(union.hasLink('c', 'd')).toBe(false);
+});
+
+test('should not find a link if one of the node is missing', () => {
+  // Arrange
+  const union = new UnionGraph();
+
+  // Act
+  union.addLink('a', 'b');
+
+  // Assert
+  expect(union.hasLink('b', 'c')).toBe(false);
+  expect(union.hasLink('c', 'b')).toBe(false);
+});
+
+test('should not find a link between unrelated nodes', () => {
+  // Arrange
+  const union = new UnionGraph();
+
+  // Act
+  union.addLink('a', 'b');
+  union.addLink('c', 'd');
+
+  // Assert
+  expect(union.hasLink('b', 'c')).toBe(false);
+});
+
+test('should find a link between directly linked nodes', () => {
+  // Arrange
+  const union = new UnionGraph();
+
+  // Act
+  union.addLink('a', 'b');
+
+  // Assert
+  expect(union.hasLink('a', 'b')).toBe(true);
+  expect(union.hasLink('b', 'a')).toBe(true);
+});
+
+test('should find a link between indirectly linked nodes', () => {
+  // Arrange
+  const union = new UnionGraph();
+
+  // Act
+  union.addLink('a', 'b');
+  union.addLink('b', 'c');
+
+  // Assert
+  expect(union.hasLink('a', 'c')).toBe(true);
+  expect(union.hasLink('c', 'a')).toBe(true);
+});
+
 // Helper
 
 function reorder(values: string[][]): string[][] {
