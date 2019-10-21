@@ -12,6 +12,7 @@ import {
 } from 'fast-check';
 import { UnionGraph } from './internal/union-graph';
 import { combinationCheck } from './internal/combination-checker';
+import { BiMultiMap } from './internal/bi-multi-map';
 
 export enum SpecDefType {
   Function = 'function',
@@ -201,11 +202,13 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
     .noShrink();
 
   const union = new UnionGraph();
+  const biMulti = new BiMultiMap();
   for (const spec of sample(specArb, settings && settings.numSamples)) {
     // Skip already covered combinations
-    if (union.hasLink(spec.spec1, spec.spec2)) {
+    if (biMulti.has(spec.spec1, spec.spec2) || union.hasLink(spec.spec1, spec.spec2)) {
       continue;
     }
+    biMulti.add(spec.spec1, spec.spec2);
     // Check if the combination holds
     if (combinationCheck(spec.inputArbs, spec.build1, spec.build2, settings && settings.numFuzz)) {
       union.addLink(spec.spec1, spec.spec2);
