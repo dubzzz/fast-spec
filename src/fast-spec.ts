@@ -194,8 +194,8 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
           inputArbs: inputsDef.map(inputDef => inputDef.arb),
           build1: (ins: any[]) => t1.build(ins, 0).value,
           build2: (ins: any[]) => t2.build(applyReindex(ins), 0).value,
-          spec1: `${t1.repr(variableNames, 0).value}`,
-          spec2: `${t2.repr(applyReindex(variableNames), 0).value}`
+          spec1: t1.repr(variableNames, 0).value,
+          spec2: t2.repr(applyReindex(variableNames), 0).value
         };
       });
     })
