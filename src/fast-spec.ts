@@ -232,7 +232,7 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
         property(genericTuple(spec.inputArbs), t => {
           return isEqual(spec.build1(t), spec.build2(t));
         }),
-        { numRuns: settings && settings.numFuzz }
+        { numRuns: settings && settings.numFuzz, endOnFailure: true }
       );
       if (!out.failed) union.addLink(minSpecLabel, maxSpecLabel);
     }
