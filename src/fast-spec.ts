@@ -14,6 +14,7 @@ import {
   Arbitrary
 } from 'fast-check';
 import { UnionGraph } from './internal/union-graph';
+import { combinationCheck } from './internal/combination-checker';
 
 export enum SpecDefType {
   Function = 'function',
@@ -208,23 +209,9 @@ export function findSpecs(def: FindSpecElement[], settings?: FindSpecSettings): 
     if (union.hasLink(spec.spec1, spec.spec2)) {
       continue;
     }
-
-    if (spec.inputArbs.length === 0) {
-      // Combination only rely on constants
-      try {
-        if (isEqual(spec.build1([]), spec.build2([]))) {
-          union.addLink(spec.spec1, spec.spec2);
-        }
-      } catch (_err) {}
-    } else {
-      // Combination rely on non-constant values
-      const out = check(
-        property(genericTuple(spec.inputArbs), t => {
-          return isEqual(spec.build1(t), spec.build2(t));
-        }),
-        { numRuns: settings && settings.numFuzz, endOnFailure: true }
-      );
-      if (!out.failed) union.addLink(spec.spec1, spec.spec2);
+    // Check if the combination holds
+    if (combinationCheck(spec.inputArbs, spec.build1, spec.build2, settings && settings.numFuzz)) {
+      union.addLink(spec.spec1, spec.spec2);
     }
   }
   return union.values().map(vs => vs.sort().join(' == '));
