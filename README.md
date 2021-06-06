@@ -4,9 +4,9 @@ Discover laws in your code like with QuickSpec
 
 ## In a nutshell
 
-Have you ever wonder what could be the laws that rule your code? The complex relations there might be between two distinct functions?
+Have you ever wondered what could be the laws that rule your code? The complex relations there might be between two distinct functions?
 
-`fast-spec` is able to help you discovering them.
+`fast-spec` is able to help you discover them.
 
 ## Example
 
